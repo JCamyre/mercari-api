@@ -1,6 +1,7 @@
 from requests import get 
 from bs4 import BeautifulSoup
 import logging
+import re
 
 # add a GUI
 
@@ -8,19 +9,19 @@ logger = logging.getLogger(__name__) # Creates an instance of the Logger class, 
 
 BASE_URL = 'https://www.mercari.com/search/'
 
+pattern = re.compile(r'\b\d{2}?|64GB\b')
 # Sample Regex for finding Intel processors: Look for '\bi\d\b', which is find any i next to a digit (i3, i5, i7)
-# Regex for ram, if : Look for '\b\d{2}?|100gb\b'. 
-# Regex for storage: Look for '\b\d{3}gb\b' or '\b\dTB\b'
+# Regex for ram, if : Look for '\b\d{2}?|64GB\b'. or '\b\d{2}?|64 GB\b'
+# Regex for storage: Look for '\b\d{3}GB\b' or '\b\d TB\b'
 class _item:
 	def __init__(self, information): # get a brand name from title
-		print(information)
-		title, price, *misc = list(information).split('$') # Should I do this as a method in the class?
+		title, price, *misc = information.split('$') # Should I do this as a method in the class?
 		self._title = title
 		self._price = price 
 		self._misc = misc
 
 	def __str__(self): # Could do a __repr__ and __str__, where __str__ only has brand name, key information, and price
-		return f'{self._title} + ${self._price}'
+		return f'{self._title}: ${self._price}'
 
 # Dictionaries translate the string version of categories and conditions to the numerical ids for the website
 categoryIds = {'Women': 1, 'Men': 2, 
@@ -69,11 +70,10 @@ def _get_soup(url):
 	return soup
 
 soup = _get_soup(url)
-div = soup.find('div', {'class': 'Space-cutht5-0'})
-posts = soup.find_all('div', {'class': 'Flex__Box-ych44r-1 '})
-print(len(posts))
-for post in posts:
-	print(post.get_text())
-	# test_item = _item(post.get_text())
-	# print(test_item)
+posts = soup.find_all('div', {'class': 'Flex__Box-ych44r-1'})[:-1]
+for post in posts[1:]: # empty first list
+	# link = post.find('div')
+	# <a href alt='IMPORTANT INFO'></a> not working for some reason
+	test_item = _item(post.get_text())
+	print(test_item)
 
