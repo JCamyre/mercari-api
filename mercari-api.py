@@ -1,6 +1,8 @@
 from requests import get 
 from bs4 import BeautifulSoup
-import json 
+import logging
+
+logger = logging.getLogger(__name__) 
 
 base_url = 'https://www.mercari.com/search/'
 
@@ -12,7 +14,7 @@ conditionIds = {'New': 1, 'Like New': 2, 'Good': 3}
 
 '''Search for a product's url using keywords. Filter results based on the condition and category of products.
 Can also choose how to sort products.'''
-def search_url(keywords, conditions=None, category=None, sortby=None):
+def search_url(keywords, conditions: str = None, category: str = None, sortby: str = None):
 	url = base_url + '?'
 	keywords = keywords.split()
 	keywords = '%20'.join(keywords)
@@ -20,11 +22,10 @@ def search_url(keywords, conditions=None, category=None, sortby=None):
 	url += keywords_url + '&'
 	if category: 
 		category_path = category.split('/')
-		yo = categoryIds
+		category_id = categoryIds
 		for category in category_path:
-			yo = yo[category]
-		print(yo)
-		category_url = f'categoryIds={yo}'
+			category_id = category_id[category]
+		category_url = f'categoryIds={category_id}'
 		url += category_url + '&'
 
 	if conditions:
@@ -38,5 +39,14 @@ def search_url(keywords, conditions=None, category=None, sortby=None):
 
 url = search_url('gaming laptop', conditions='Like New, Good', category='Electronics/Computers & Laptops/Laptops & netbooks')
 request = get(url)
-soup = BeautifulSoup(request, 'lxml')
-print(request.json())
+soup = BeautifulSoup(request.content, 'lxml')
+print(soup)
+logger.info(f'GET: {url}')
+headers = {'User-Agent': "'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 "
+                         "(KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36'"}
+response = get(url, headers=headers, timeout=20)
+assert response.status_code == 200
+soup = BeautifulSoup(response.content, 'lxml')
+print(soup.get_text())
+'''_method_name to indictate that the method is not used when importing this package, rather it is only to be used
+within the package itself in other methods'''
