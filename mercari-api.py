@@ -2,9 +2,25 @@ from requests import get
 from bs4 import BeautifulSoup
 import logging
 
-logger = logging.getLogger(__name__) 
+# add a GUI
 
-base_url = 'https://www.mercari.com/search/'
+logger = logging.getLogger(__name__) # Creates an instance of the Logger class, so that we can configure it using handlers and display information 
+
+BASE_URL = 'https://www.mercari.com/search/'
+
+# Sample Regex for finding Intel processors: Look for '\bi\d\b', which is find any i next to a digit (i3, i5, i7)
+# Regex for ram, if : Look for '\b\d{2}?|100gb\b'. 
+# Regex for storage: Look for '\b\d{3}gb\b' or '\b\dTB\b'
+class _item:
+	def __init__(self, information): # get a brand name from title
+		print(information)
+		title, price, *misc = list(information).split('$') # Should I do this as a method in the class?
+		self._title = title
+		self._price = price 
+		self._misc = misc
+
+	def __str__(self): # Could do a __repr__ and __str__, where __str__ only has brand name, key information, and price
+		return f'{self._title} + ${self._price}'
 
 # Dictionaries translate the string version of categories and conditions to the numerical ids for the website
 categoryIds = {'Women': 1, 'Men': 2, 
@@ -14,8 +30,8 @@ conditionIds = {'New': 1, 'Like New': 2, 'Good': 3}
 
 '''Search for a product's url using keywords. Filter results based on the condition and category of products.
 Can also choose how to sort products.'''
-def search_url(keywords, conditions: str = None, category: str = None, sortby: str = None):
-	url = base_url + '?'
+def _get_url(keywords, conditions: str = None, category: str = None, sortby: str = None):
+	url = BASE_URL + '?'
 	keywords = keywords.split()
 	keywords = '%20'.join(keywords)
 	keywords_url = f'keyword={keywords}'
@@ -37,16 +53,27 @@ def search_url(keywords, conditions: str = None, category: str = None, sortby: s
 
 	return url
 
-url = search_url('gaming laptop', conditions='Like New, Good', category='Electronics/Computers & Laptops/Laptops & netbooks')
-request = get(url)
-soup = BeautifulSoup(request.content, 'lxml')
-print(soup)
-logger.info(f'GET: {url}')
-headers = {'User-Agent': "'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 "
-                         "(KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36'"}
-response = get(url, headers=headers, timeout=20)
-assert response.status_code == 200
-soup = BeautifulSoup(response.content, 'lxml')
-print(soup.get_text())
+url = _get_url('gaming laptop', conditions='Like New, Good', category='Electronics/Computers & Laptops/Laptops & netbooks')
+
 '''_method_name to indictate that the method is not used when importing this package, rather it is only to be used
-within the package itself in other methods'''
+within the package itself in other methods. getters, setters, mutation methods, private variables, encapsulation.'''
+def _get_soup(url):		
+	logger.info(f'GET: {url}') # 'GET' HTTP request data from a website
+	'''HTTP headers let me pass additional information with an HTTP request
+	User-Agent: Network protocol peers can see which browser I am 'using'''
+	headers = {'User-Agent': "'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 " # these are the ML "agents" that completes tasks for humans
+	                         "(KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36'"}
+	response = get(url, headers=headers, timeout=20) # wait 20s for website to send a response
+	assert response.status_code == 200 # if response.status_code != 200, raise an AssertionError. 200 status code means a response was sent.
+	soup = BeautifulSoup(response.content, 'lxml')
+	return soup
+
+soup = _get_soup(url)
+div = soup.find('div', {'class': 'Space-cutht5-0'})
+posts = soup.find_all('div', {'class': 'Flex__Box-ych44r-1 '})
+print(len(posts))
+for post in posts:
+	print(post.get_text())
+	# test_item = _item(post.get_text())
+	# print(test_item)
+
