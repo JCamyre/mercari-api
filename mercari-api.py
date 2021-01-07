@@ -4,13 +4,15 @@ import json
 
 base_url = 'https://www.mercari.com/search/'
 
-# have a way to display all of the category choices by printing the dict
+# Dictionaries translate the string version of categories and conditions to the numerical ids for the website
 categoryIds = {'Women': 1, 'Men': 2, 
 'Electronics': {'Computers & Laptops': {'Laptops & netbooks': 771, 'Desktops & all-in-ones': 772}}}
 
 conditionIds = {'New': 1, 'Like New': 2, 'Good': 3}
 
-def search_product(keywords, conditions=None, category=None, sortby=None):
+'''Search for a product's url using keywords. Filter results based on the condition and category of products.
+Can also choose how to sort products.'''
+def search_url(keywords, conditions=None, category=None, sortby=None):
 	url = base_url + '?'
 	keywords = keywords.split()
 	keywords = '%20'.join(keywords)
@@ -34,7 +36,7 @@ def search_product(keywords, conditions=None, category=None, sortby=None):
 
 	return url
 
-url = search_product('gaming laptop', conditions='Like New, Good', category='Electronics/Computers & Laptops/Laptops & netbooks')
+url = search_url('gaming laptop', conditions='Like New, Good', category='Electronics/Computers & Laptops/Laptops & netbooks')
 request = get(url)
 soup = BeautifulSoup(request, 'lxml')
 print(request.json())
