@@ -9,10 +9,14 @@ logger = logging.getLogger(__name__) # Creates an instance of the Logger class, 
 
 BASE_URL = 'https://www.mercari.com/search/'
 
-pattern = re.compile(r'\b\d{2}?|64GB\b')
+def _find_matches(pattern, words):
+	match = pattern.search(words)
+	return match
+
 # Sample Regex for finding Intel processors: Look for '\bi\d\b', which is find any i next to a digit (i3, i5, i7)
 # Regex for ram, if : Look for '\b\d{2}?|64GB\b'. or '\b\d{2}?|64 GB\b'
 # Regex for storage: Look for '\b\d{3}GB\b' or '\b\d TB\b'
+# Laptop brand is in the same spot everytime. Get a tuple of brands.
 class _item:
 	def __init__(self, information): # get a brand name from title
 		title, price, *misc = information.split('$') # Should I do this as a method in the class?
@@ -74,6 +78,15 @@ posts = soup.find_all('div', {'class': 'Flex__Box-ych44r-1'})[:-1]
 for post in posts[1:]: # empty first list
 	# link = post.find('div')
 	# <a href alt='IMPORTANT INFO'></a> not working for some reason
-	test_item = _item(post.get_text())
+	post_title = post.get_text()
+	test_item = _item(post_title)
+	_pattern = re.compile(r'\b\d{2}GB') # ?|64 \b
+	_find_matches(_pattern, post_title)
+	_pattern = re.compile(r'\bi\d')
+	intel_cpu = _find_matches(_pattern, post_title)
+	if intel_cpu:
+		print('Intel Core ' + intel_cpu.group(0))
+	print(post.get_text())
+	print('*' * 200)
 	print(test_item)
 
