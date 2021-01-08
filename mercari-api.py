@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__) # Creates an instance of the Logger class, 
 
 BASE_URL = 'https://www.mercari.com/search/'
 
-def _find_matches(pattern, words):
+def _find_match(pattern, words):
 	match = pattern.search(words)
 	return match
 
@@ -78,15 +78,20 @@ posts = soup.find_all('div', {'class': 'Flex__Box-ych44r-1'})[:-1]
 for post in posts[1:]: # empty first list
 	# link = post.find('div')
 	# <a href alt='IMPORTANT INFO'></a> not working for some reason
+	# Need to get URL for each post.
 	post_title = post.get_text()
 	test_item = _item(post_title)
+	print(test_item)
 	_pattern = re.compile(r'\b\d{2}GB') # ?|64 \b
-	_find_matches(_pattern, post_title)
+	_find_match(_pattern, post_title)
 	_pattern = re.compile(r'\bi\d')
-	intel_cpu = _find_matches(_pattern, post_title)
+	intel_cpu = _find_match(_pattern, post_title)
 	if intel_cpu:
 		print('Intel Core ' + intel_cpu.group(0))
-	print(post.get_text())
-	print('*' * 200)
-	print(test_item)
+	_pattern = re.compile(r'\b(?i)(\wTX)\s?\d{3,4}')
+	nvidia_gpu = _find_match(_pattern, post_title)
+	if nvidia_gpu:
+		print(nvidia_gpu.group(0))
+	print('*' * 100)
+
 
