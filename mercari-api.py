@@ -88,7 +88,7 @@ for post in posts[1:]: # empty first list
 	intel_cpu = _find_match(_pattern, post_title)
 	if intel_cpu:
 		print('Intel Core ' + intel_cpu.group(0))
-	_pattern = re.compile(r'\b(?i)(\wTX)\s?\d{3,4}')
+	_pattern = re.compile(r'\b(?i:\wTX)\s?\d{3,4}') # (?i)(\wTX) doesn't work. Using inline flag name locally (within parentheses)
 	nvidia_gpu = _find_match(_pattern, post_title)
 	if nvidia_gpu:
 		print(nvidia_gpu.group(0))
