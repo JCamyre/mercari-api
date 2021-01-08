@@ -25,13 +25,15 @@ class _item:
 		self._misc = misc
 
 	def __str__(self): # Could do a __repr__ and __str__, where __str__ only has brand name, key information, and price
-		return f'{self._title}: ${self._price}'
+		return f'{self._title[3:]}: ${self._price}'
 
 # Dictionaries translate the string version of categories and conditions to the numerical ids for the website
 categoryIds = {'Women': 1, 'Men': 2, 
 'Electronics': {'Computers & Laptops': {'Laptops & netbooks': 771, 'Desktops & all-in-ones': 772}}}
 
 conditionIds = {'New': 1, 'Like New': 2, 'Good': 3}
+
+BRANDS = ('ASUS', 'Acer', 'HP', 'Toshiba', 'Lenovo', 'Dell', 'MSI', 'Alienware')
 
 '''Search for a product's url using keywords. Filter results based on the condition and category of products.
 Can also choose how to sort products.'''
@@ -73,25 +75,25 @@ def _get_soup(url):
 	soup = BeautifulSoup(response.content, 'lxml')
 	return soup
 
-soup = _get_soup(url)
-posts = soup.find_all('div', {'class': 'Flex__Box-ych44r-1'})[:-1]
-for post in posts[1:]: # empty first list
-	# link = post.find('div')
-	# <a href alt='IMPORTANT INFO'></a> not working for some reason
-	# Need to get URL for each post.
-	post_title = post.get_text()
-	test_item = _item(post_title)
-	print(test_item)
-	_pattern = re.compile(r'\b\d{2}GB') # ?|64 \b
-	_find_match(_pattern, post_title)
-	_pattern = re.compile(r'\bi\d')
-	intel_cpu = _find_match(_pattern, post_title)
-	if intel_cpu:
-		print('Intel Core ' + intel_cpu.group(0))
-	_pattern = re.compile(r'\b(?i:\wTX)\s?\d{3,4}') # (?i)(\wTX) doesn't work. Using inline flag name locally (within parentheses)
-	nvidia_gpu = _find_match(_pattern, post_title)
-	if nvidia_gpu:
-		print(nvidia_gpu.group(0))
-	print('*' * 100)
+def _process_soup(soup):
+	posts = soup.find_all('div', {'class': 'Flex__Box-ych44r-1'})[:-1]
+	for post in posts[1:]: # empty first element
+		# link = post.find('div')
+		# <a href alt='IMPORTANT INFO'></a> not working for some reason
+		# Need to get URL for each post. Also getting the stats from the webpage itself. 
+		post_title = post.get_text()
+		test_item = _item(post_title)
+		print(test_item)
+		_pattern = re.compile(r'\b\d{2}GB')
+		_find_match(_pattern, post_title)
+		_pattern = re.compile(r'\bi\d')
+		intel_cpu = _find_match(_pattern, post_title)
+		if intel_cpu:
+			print('CPU: Intel Core ' + intel_cpu.group(0))
+		_pattern = re.compile(r'\b(?i:\wTX)\s?\d{3,4}') # (?i)(\wTX) doesn't work. Using inline flag name locally (within parentheses)
+		nvidia_gpu = _find_match(_pattern, post_title)
+		if nvidia_gpu:
+			print('GPU: ' + nvidia_gpu.group(0))
+		print('*' * 100)
 
-
+_process_soup(_get_soup(url))
