@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup
 import logging
 import re
 
-# add a GUI
+# add a GUI where you enter all the information for a product, then list of titles and you can click on them, so need the href
+# [b]Yo: [ref='www.youtube.com']Laptop title[/ref][/b]
 
 logger = logging.getLogger(__name__) # Creates an instance of the Logger class, so that we can configure it using handlers and display information 
 
@@ -33,7 +34,7 @@ categoryIds = {'Women': 1, 'Men': 2,
 
 conditionIds = {'New': 1, 'Like New': 2, 'Good': 3}
 
-BRANDS = ('ASUS', 'Acer', 'HP', 'Toshiba', 'Lenovo', 'Dell', 'MSI', 'Alienware')
+BRANDS = ('ASUS', 'Acer', 'HP', 'Toshiba', 'Lenovo', 'Dell', 'MSI', 'Alienware') # Search for these words in the title
 
 '''Search for a product's url using keywords. Filter results based on the condition and category of products.
 Can also choose how to sort products.'''
@@ -81,6 +82,7 @@ def _process_soup(soup):
 		# link = post.find('div')
 		# <a href alt='IMPORTANT INFO'></a> not working for some reason
 		# Need to get URL for each post. Also getting the stats from the webpage itself. 
+
 		post_title = post.get_text()
 		test_item = _item(post_title)
 		print(test_item)
@@ -97,3 +99,17 @@ def _process_soup(soup):
 		print('*' * 100)
 
 _process_soup(_get_soup(url))
+
+html = '''<a href="some_url">next</a>
+<span class="class"><a href="another_url">later</a></span>'''
+
+soup = BeautifulSoup(html, 'lxml')
+print(type(soup))
+for a in soup.find_all('a', href=True):
+    print("Found the URL:", a['href'])
+
+soup = BeautifulSoup('<a class="nav-link match-link-stats" href="/football/matches/match867851_Kalteng_Putra-Arema-online/" title="Stat"><i class="icon-match-link"></i></a>', 'lxml')
+tag = soup.find('a')
+type(tag)
+print(tag.get('href'))
+tag['href']
