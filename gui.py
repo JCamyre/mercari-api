@@ -5,6 +5,11 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
 from kivy.config import Config
+from kivy.uix.spinner import Spinner
+
+'''Current goals:
+Implement cool looking GUI skins
+'''
 
 # Have to add Roboto-Light.tff manually, can I automate for people downloading it as an executable?
 Config.set('kivy', 'default_font', ['data/fonts/Roboto-Light.tff', 'data/fonts/Roboto-Regular.ttf', 'data/fonts/Roboto-Italic.ttf', 'data/fonts/Roboto-Bold.ttf', 'data/fonts/Roboto-BoldItalic.ttf']) 
@@ -15,10 +20,11 @@ class SearchScreen(GridLayout):
     def __init__(self, **kwargs):
         super(SearchScreen, self).__init__(**kwargs)
         self.cols = 1
-        self.keywords = TextInput(hint_text='search keywords', multiline=False, size_hint=(.2, None), height=30) # , 
+        self.keywords = TextInput(hint_text='Enter keywords', multiline=False, size_hint=(.2, None), height=30) # , 
         self.add_widget(self.keywords)
-        self.condition = TextInput(hint_text='enter desired conditions', multiline=False, size_hint=(.2, None), height=30)
-        self.add_widget(self.condition)
+        self.category = None
+        self.conditions = None
+        self.sortby = 'Best match'
 
         # Category Selection
         electronics_dropdown = DropDown()
@@ -27,28 +33,51 @@ class SearchScreen(GridLayout):
         self.computers_btn = Button(text='Computers', size_hint=(.2, None), height=30)
         self.computers_btn.bind(on_release=computers_dropdown.open)
         self.laptops = Button(text='Laptops', size_hint=(.2, None), height=30)
+        def choose_category(instance, text):
+            self.category = text # Equivalent for lambda instance, text: setattr(self, 'category', text)
+            print(f'Currently selected: {self.category}')
+
         self.laptops.bind(on_release=lambda btn: computers_dropdown.select(btn.text))
+        # lambda instance, x: print(instance, x)
+        computers_dropdown.bind(on_select = choose_category) # "Listen for the selection". This is the highly coveted DropDown.select()
         computers_dropdown.add_widget(self.laptops)
 
         self.electronics_btn = Button(text='Electronics', size_hint=(.2, None), height=30)
         self.electronics_btn.bind(on_release=electronics_dropdown.open)
         electronics_dropdown.add_widget(self.computers_btn)
+        electronics_dropdown.bind(on_select=choose_category)
         self.add_widget(self.electronics_btn)
 
-        conditions_dropdown = DropDown()
+        conditions_dropdown = DropDown() # Button+DropDown+ToggleButton.
         self.conditions_btn = Button(text='Conditions', size_hint=(.2, None), height=30)
         self.conditions_btn.bind(on_release=conditions_dropdown.open)
         for condition in ['New', 'Like New', 'Good']:
             btn = Button(text=condition, size_hint=(.2, None), height=30)
             btn.bind(on_release=lambda btn: conditions_dropdown.select(btn.text))
             conditions_dropdown.add_widget(btn)
+        def choose_conditions(instance, text):
+            self.condition = 
+        conditions_dropdown.bind(on_select=choose_category)
         self.add_widget(self.conditions_btn)
 
+        sortby_spinner = Spinner(
+            text='Best match',
+            values=('Newest', 'Ascending', 'Descending', 'Number of likes'),
+            size_hint=(None, None),
+            size=(100, 44),
+            pos_hint={'center_x': .5, 'center_y': .5})
+
+        def choose_sortby(spinner, text):
+            self.sortby = text
+            print(f'You are currently sorting by: {self.sortby}')
+
+        sortby_spinner.bind(text=choose_sortby)
+        self.add_widget(sortby_spinner)
 
         # Have a selection for sortby.
         # Should I do categories a selection thing?
         self.search_btn = Button(text='Search Products')
-        self.search_btn.bind(on_release=lambda x: print('yo'))
+        self.search_btn.bind(on_release=lambda _: print(self.keywords, self.conditions, self.category, self.sortby))
         self.add_widget(self.search_btn)
 
 
