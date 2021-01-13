@@ -6,6 +6,7 @@ from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
 from kivy.config import Config
 from kivy.uix.spinner import Spinner
+from kivy.uix.togglebutton import ToggleButton
 
 '''Current goals:
 Implement cool looking GUI skins
@@ -22,8 +23,8 @@ class SearchScreen(GridLayout):
         self.cols = 1
         self.keywords = TextInput(hint_text='Enter keywords', multiline=False, size_hint=(.2, None), height=30) # , 
         self.add_widget(self.keywords)
-        self.category = None
-        self.conditions = None
+        self.categories = set()
+        self.conditions = set()
         self.sortby = 'Best match'
 
         # Category Selection
@@ -32,10 +33,12 @@ class SearchScreen(GridLayout):
 
         self.computers_btn = Button(text='Computers', size_hint=(.2, None), height=30)
         self.computers_btn.bind(on_release=computers_dropdown.open)
-        self.laptops = Button(text='Laptops', size_hint=(.2, None), height=30)
+        self.laptops = ToggleButton(text='Laptops', size_hint=(.2, None), height=30) # 
+        self.desktops = ToggleButton(text='Desktops', size_hint=(.2, None), height=30)
+
         def choose_category(instance, text):
-            self.category = text # Equivalent for lambda instance, text: setattr(self, 'category', text)
-            print(f'Currently selected: {self.category}')
+            self.categories = text # Equivalent for lambda instance, text: setattr(self, 'category', text)
+            print(f'Currently selected: {self.categories}')
 
         self.laptops.bind(on_release=lambda btn: computers_dropdown.select(btn.text))
         # lambda instance, x: print(instance, x)
@@ -48,16 +51,20 @@ class SearchScreen(GridLayout):
         electronics_dropdown.bind(on_select=choose_category)
         self.add_widget(self.electronics_btn)
 
-        conditions_dropdown = DropDown() # Button+DropDown+ToggleButton.
+        conditions_dropdown = DropDown()
         self.conditions_btn = Button(text='Conditions', size_hint=(.2, None), height=30)
         self.conditions_btn.bind(on_release=conditions_dropdown.open)
         for condition in ['New', 'Like New', 'Good']:
-            btn = Button(text=condition, size_hint=(.2, None), height=30)
+            btn = ToggleButton(text=condition, size_hint=(.2, None), height=30)
             btn.bind(on_release=lambda btn: conditions_dropdown.select(btn.text))
             conditions_dropdown.add_widget(btn)
-        def choose_conditions(instance, text):
-            self.condition = 
-        conditions_dropdown.bind(on_select=choose_category)
+        def choose_conditions(instance, condition):
+            if condition in self.conditions:
+                self.conditions.remove(condition)
+            else:
+                self.conditions.add(condition)
+
+        conditions_dropdown.bind(on_select=choose_conditions)
         self.add_widget(self.conditions_btn)
 
         sortby_spinner = Spinner(
@@ -76,8 +83,12 @@ class SearchScreen(GridLayout):
 
         # Have a selection for sortby.
         # Should I do categories a selection thing?
+        def search_products(instance):
+            print(f'Keywords: {self.keywords} Conditions: {self.conditions} Categories: {self.categories} Sortby: {self.sortby}')
+            
+
         self.search_btn = Button(text='Search Products')
-        self.search_btn.bind(on_release=lambda _: print(self.keywords, self.conditions, self.category, self.sortby))
+        self.search_btn.bind(on_release=search_products)
         self.add_widget(self.search_btn)
 
 
