@@ -7,6 +7,7 @@ from kivy.uix.dropdown import DropDown
 from kivy.config import Config
 from kivy.uix.spinner import Spinner
 from kivy.uix.togglebutton import ToggleButton
+from kivy.core.window import Window
 
 '''Current goals:
 Implement cool looking GUI skins
@@ -20,6 +21,8 @@ class SearchScreen(GridLayout):
 
     def __init__(self, **kwargs):
         super(SearchScreen, self).__init__(**kwargs)
+        Window.clearcolor = (1, 1, 1, 0.2)
+        self.light_theme = True # False == dark theme
         self.cols = 1
         self.keywords = TextInput(hint_text='Enter keywords', multiline=False, size_hint=(.2, None), height=30) # , 
         self.add_widget(self.keywords)
@@ -41,18 +44,17 @@ class SearchScreen(GridLayout):
             print(f'Currently selected: {self.categories}')
 
         self.laptops.bind(on_release=lambda btn: computers_dropdown.select(btn.text))
-        # lambda instance, x: print(instance, x)
         computers_dropdown.bind(on_select = choose_category) # "Listen for the selection". This is the highly coveted DropDown.select()
         computers_dropdown.add_widget(self.laptops)
 
-        self.electronics_btn = Button(text='Electronics', size_hint=(.2, None), height=30)
+        self.electronics_btn = Button(text='Electronics', size_hint=(None, None), height=30, color=(1, 1, 1, 1), background_color=(39/255, 142/255, 1, 0.9))
         self.electronics_btn.bind(on_release=electronics_dropdown.open)
         electronics_dropdown.add_widget(self.computers_btn)
         electronics_dropdown.bind(on_select=choose_category)
         self.add_widget(self.electronics_btn)
 
         conditions_dropdown = DropDown()
-        self.conditions_btn = Button(text='Conditions', size_hint=(.2, None), height=30)
+        self.conditions_btn = Button(text='Conditions', size_hint=(None, None), height=30, color=(1, 1, 1, 1), background_color=(39/255, 142/255, 1, 0.9))
         self.conditions_btn.bind(on_release=conditions_dropdown.open)
         for condition in ['New', 'Like New', 'Good']:
             btn = ToggleButton(text=condition, size_hint=(.2, None), height=30)
@@ -72,7 +74,9 @@ class SearchScreen(GridLayout):
             values=('Newest', 'Ascending', 'Descending', 'Number of likes'),
             size_hint=(None, None),
             size=(100, 44),
-            pos_hint={'center_x': .5, 'center_y': .5})
+            pos_hint={'center_x': .5, 'center_y': .5}, 
+            color=(1, 1, 1, 1), 
+            background_color=(39/255, 142/255, 1, 0.9))
 
         def choose_sortby(spinner, text):
             self.sortby = text
@@ -84,15 +88,15 @@ class SearchScreen(GridLayout):
         # Have a selection for sortby.
         # Should I do categories a selection thing?
         def search_products(instance):
-            print(f'Keywords: {self.keywords} Conditions: {self.conditions} Categories: {self.categories} Sortby: {self.sortby}')
+            print(f'Keywords: {self.keywords.text}, Conditions: {self.conditions}, Categories: {self.categories}, Sortby: {self.sortby}')
             
 
-        self.search_btn = Button(text='Search Products')
+        self.search_btn = Button(text='Search Products', color=(1, 1, 1, 1), background_color=(39/255, 142/255, 1, 0.9))
         self.search_btn.bind(on_release=search_products)
         self.add_widget(self.search_btn)
 
 
-
+# Alternative colors: (21, 124, 251), (165, 206, 254)
 
 
 class MyApp(App):
