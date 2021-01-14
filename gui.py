@@ -8,6 +8,7 @@ from kivy.config import Config
 from kivy.uix.spinner import Spinner
 from kivy.uix.togglebutton import ToggleButton
 from kivy.core.window import Window
+import mercari
 
 '''Current goals:
 Implement cool looking GUI skins
@@ -24,37 +25,54 @@ class SearchScreen(GridLayout):
         Window.clearcolor = (1, 1, 1, 0.2)
         self.light_theme = True # False == dark theme
         self.cols = 1
-        self.keywords = TextInput(hint_text='Enter keywords', multiline=False, size_hint=(.2, None), height=30) # , 
+        self.keywords = TextInput(hint_text='Enter keywords', multiline=False, size_hint=(.2, None), 
+        height=30, background_color=(0, 0, 0, 0.2), foreground_color=(1, 1, 1, 1)) # , 
         self.add_widget(self.keywords)
         self.categories = set()
         self.conditions = set()
         self.sortby = 'Best match'
 
         # Category Selection
+        self.options = GridLayout()
+        self.options.rows = 1
+        categories_dropdown = DropDown()
         electronics_dropdown = DropDown()
         computers_dropdown = DropDown()
 
+        def dropdown_btn(btn, dropdown):
+            dropdown.open(btn)
+            self.categories.add(btn.text)
+
         self.computers_btn = Button(text='Computers', size_hint=(.2, None), height=30)
-        self.computers_btn.bind(on_release=computers_dropdown.open)
+        self.computers_btn.bind(on_release=lambda btn: dropdown_btn(btn, computers_dropdown))
         self.laptops = ToggleButton(text='Laptops', size_hint=(.2, None), height=30) # 
         self.desktops = ToggleButton(text='Desktops', size_hint=(.2, None), height=30)
 
         def choose_category(instance, text):
-            self.categories = text # Equivalent for lambda instance, text: setattr(self, 'category', text)
-            print(f'Currently selected: {self.categories}')
+            if text in self.categories:
+                self.categories.remove(text)
+            else:
+                self.categories.add(text) # Equivalent for lambda instance, text: setattr(self, 'category', text)
 
         self.laptops.bind(on_release=lambda btn: computers_dropdown.select(btn.text))
         computers_dropdown.bind(on_select = choose_category) # "Listen for the selection". This is the highly coveted DropDown.select()
         computers_dropdown.add_widget(self.laptops)
 
-        self.electronics_btn = Button(text='Electronics', size_hint=(None, None), height=30, color=(1, 1, 1, 1), background_color=(39/255, 142/255, 1, 0.9))
-        self.electronics_btn.bind(on_release=electronics_dropdown.open)
+        self.electronics_btn = Button(text='Electronics', size_hint=(None, None), height=30, 
+                                        color=(1, 1, 1, 1), background_color=(.21, 1.24, 2.25, 0.9))
+        self.electronics_btn.bind(on_release=lambda btn: dropdown_btn(btn, electronics_dropdown))
         electronics_dropdown.add_widget(self.computers_btn)
         electronics_dropdown.bind(on_select=choose_category)
-        self.add_widget(self.electronics_btn)
 
+        self.categories_btn = Button(text='Categories', size_hint=(.1, None), height=30, 
+                                        color=(1, 1, 1, 1), background_color=(.21, 1.24, 2.25, 0.9))
+        self.categories_btn.bind(on_release=categories_dropdown.open)
+        categories_dropdown.add_widget(self.electronics_btn)
+        self.options.add_widget(self.categories_btn)
+
+        # Conditions Selection
         conditions_dropdown = DropDown()
-        self.conditions_btn = Button(text='Conditions', size_hint=(None, None), height=30, color=(1, 1, 1, 1), background_color=(39/255, 142/255, 1, 0.9))
+        self.conditions_btn = Button(text='Conditions', size_hint=(.1, None), height=30, color=(1, 1, 1, 1), background_color=(.21, 1.24, 2.25, 0.9))
         self.conditions_btn.bind(on_release=conditions_dropdown.open)
         for condition in ['New', 'Like New', 'Good']:
             btn = ToggleButton(text=condition, size_hint=(.2, None), height=30)
@@ -67,37 +85,36 @@ class SearchScreen(GridLayout):
                 self.conditions.add(condition)
 
         conditions_dropdown.bind(on_select=choose_conditions)
-        self.add_widget(self.conditions_btn)
+        self.options.add_widget(self.conditions_btn)
 
+        # Sortby Selection
         sortby_spinner = Spinner(
             text='Best match',
-            values=('Newest', 'Ascending', 'Descending', 'Number of likes'),
-            size_hint=(None, None),
-            size=(100, 44),
+            values=('Newest', 'Ascending', 'Descending', '# of likes'),
+            size_hint=(.1, None),
+            height=30,
             pos_hint={'center_x': .5, 'center_y': .5}, 
             color=(1, 1, 1, 1), 
-            background_color=(39/255, 142/255, 1, 0.9))
+            background_color=(.21, 1.24, 2.25, 0.9))
 
         def choose_sortby(spinner, text):
             self.sortby = text
-            print(f'You are currently sorting by: {self.sortby}')
 
         sortby_spinner.bind(text=choose_sortby)
-        self.add_widget(sortby_spinner)
+        self.options.add_widget(sortby_spinner)
+        self.add_widget(self.options)
 
-        # Have a selection for sortby.
-        # Should I do categories a selection thing?
         def search_products(instance):
-            print(f'Keywords: {self.keywords.text}, Conditions: {self.conditions}, Categories: {self.categories}, Sortby: {self.sortby}')
-            
+            # print(f'Keywords: {self.keywords.text}, Conditions: {self.conditions}, Categories: {self.categories}, Sortby: {self.sortby}')
+            self.keywords.text, self.conditions, self.categories, self.sortby
 
-        self.search_btn = Button(text='Search Products', color=(1, 1, 1, 1), background_color=(39/255, 142/255, 1, 0.9))
-        self.search_btn.bind(on_release=search_products)
+        self.search_btn = Button(text='Search Products', color=(1, 1, 1, 1), background_color=(.21, 1.24, 2.25, 0.9))
+        self.search_btn.bind(on_release=lambda _: mercari.get_products(self.keywords.text, conditions=self.conditions, categories=self.categories, sortby=self.sortby))
         self.add_widget(self.search_btn)
 
 
 # Alternative colors: (21, 124, 251), (165, 206, 254)
-
+# (0.01, 206, 255, 0.9)
 
 class MyApp(App):
 

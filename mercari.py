@@ -98,18 +98,23 @@ def _process_soup(soup):
 			print('GPU: ' + nvidia_gpu.group(0))
 		print('*' * 100)
 
-_process_soup(_get_soup(url))
+def get_products(keywords, categories='Like New, Good', conditions=, sortby=):
+	print(keywords, categories, conditions, sortby)
+	_process_soup(_get_soup(_get_url(keywords, categories=categories2, conditions=conditions2, sortby=sortby2)))
 
-html = '''<a href="some_url">next</a>
-<span class="class"><a href="another_url">later</a></span>'''
+if __name__ == '__main__':
+	_process_soup(_get_soup(url))
 
-soup = BeautifulSoup(html, 'lxml')
-print(type(soup))
-for a in soup.find_all('a', href=True):
-    print("Found the URL:", a['href'])
+	html = '''<a href="some_url">next</a>
+	<span class="class"><a href="another_url">later</a></span>'''
 
-soup = BeautifulSoup('<a class="nav-link match-link-stats" href="/football/matches/match867851_Kalteng_Putra-Arema-online/" title="Stat"><i class="icon-match-link"></i></a>', 'lxml')
-tag = soup.find('a')
-type(tag)
-print(tag.get('href'))
-tag['href']
+	soup = BeautifulSoup(html, 'lxml')
+	print(type(soup))
+	for a in soup.find_all('a', href=True):
+	    print("Found the URL:", a['href'])
+
+	soup = BeautifulSoup('<a class="nav-link match-link-stats" href="/football/matches/match867851_Kalteng_Putra-Arema-online/" title="Stat"><i class="icon-match-link"></i></a>', 'lxml')
+	tag = soup.find('a')
+	type(tag)
+	print(tag.get('href'))
+	tag['href']
