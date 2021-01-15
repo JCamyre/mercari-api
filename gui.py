@@ -90,7 +90,7 @@ class SearchScreen(GridLayout):
         # Sortby Selection
         sortby_spinner = Spinner(
             text='Best match',
-            values=('Newest', 'Ascending', 'Descending', '# of likes'),
+            values=('Newest first', 'Lowest price first', 'Highest price first', 'Number of likes'),
             size_hint=(.1, None),
             height=30,
             pos_hint={'center_x': .5, 'center_y': .5}, 

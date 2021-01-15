@@ -1,5 +1,4 @@
-import mercari
-import gui
+import mercariforpy
 
 app = gui.MyApp()
 app.run()

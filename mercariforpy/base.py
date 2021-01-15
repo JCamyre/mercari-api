@@ -29,8 +29,9 @@ class _item:
 		return f'{self._title[3:]}: ${self._price}'
 
 # Dictionaries translate the string version of categories and conditions to the numerical ids for the website
+# Have to revamp this
 categoryIds = {'Women': 1, 'Men': 2, 
-'Electronics': {'Computers & Laptops': 77{'Laptops & netbooks': 771, 'Desktops & all-in-ones': 772}}}
+'Electronics': {'Computers & Laptops': {'Laptops & netbooks': 771, 'Desktops & all-in-ones': 772}}}
 
 conditionIds = {'New': 1, 'Like New': 2, 'Good': 3}
 
