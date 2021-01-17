@@ -122,6 +122,9 @@ if __name__ == '__main__':
 	print(tag.get('href'))
 	tag['href']
 
+
+# GUI
+
 from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
@@ -132,7 +135,6 @@ from kivy.config import Config
 from kivy.uix.spinner import Spinner
 from kivy.uix.togglebutton import ToggleButton
 from kivy.core.window import Window
-# GUI
 
 '''Current goals:
 Implement cool looking GUI skins
@@ -236,6 +238,10 @@ class SearchScreen(GridLayout):
         self.search_btn.bind(on_release=lambda _: get_products(self.keywords.text, conditions=self.conditions, categories=self.categories, sortby=self.sortby))
         self.add_widget(self.search_btn)
 
+def get_products(keywords, categories=None, conditions={'Like New', 'Good'}, sortby=None):
+	print(keywords, categories, conditions, sortby)
+	print(_process_soup(_get_soup(_get_url(keywords, categories=categories, conditions=conditions, sortby=sortby))))
+	# Make new Kivy screen to handle displaying products
 
 # Alternative colors: (21, 124, 251), (165, 206, 254)
 # (0.01, 206, 255, 0.9)
