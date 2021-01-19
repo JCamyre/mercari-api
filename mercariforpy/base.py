@@ -5,9 +5,8 @@ import re
 
 
 # add a GUI where you enter all the information for a product, then list of titles and you can click on them, so need the href
-# [b]Yo: [ref='www.youtube.com']Laptop title[/ref][/b]
 
-logger = logging.getLogger(__name__) # Creates an instance of the Logger class, so that we can configure it using handlers and display information 
+logger = logging.getLogger(__name__) 
 
 BASE_URL = 'https://www.mercari.com/search/'
 
@@ -15,22 +14,16 @@ def _find_match(pattern, words):
 	match = pattern.search(words)
 	return match
 
-# Sample Regex for finding Intel processors: Look for '\bi\d\b', which is find any i next to a digit (i3, i5, i7)
-# Regex for ram, if : Look for '\b\d{2}?|64GB\b'. or '\b\d{2}?|64 GB\b'
-# Regex for storage: Look for '\b\d{3}GB\b' or '\b\d TB\b'
-# Laptop brand is in the same spot everytime. Get a tuple of brands.
 class _item:
-	def __init__(self, information): # get a brand name from title
-		title, price, *misc = information.split('$') # Should I do this as a method in the class?
+	def __init__(self, information):
+		title, price, *misc = information.split('$')
 		self._title = title
 		self._price = price 
 		self._misc = misc
 
-	def __str__(self): # Could do a __repr__ and __str__, where __str__ only has brand name, key information, and price
+	def __str__(self): 
 		return f'{self._title[3:]}: ${self._price}'
 
-# Dictionaries translate the string version of categories and conditions to the numerical ids for the website
-# Have to revamp this
 category_ids = {'Women': 1, 'Men': 2, 'Electronics': 7, 'Computers': 77, 'Laptops': 771, 
 'Desktops & all-in-ones': 772}
 
@@ -68,16 +61,12 @@ def _get_url(keywords, conditions: str = None, categories: list = None, sortby: 
 
 	return url
 
-'''_method_name to indictate that the method is not used when importing this package, rather it is only to be used
-within the package itself in other methods. getters, setters, mutation methods, private variables, encapsulation.'''
 def _get_soup(url):		
-	logger.info(f'GET: {url}') # 'GET' HTTP request data from a website
-	'''HTTP headers let me pass additional information with an HTTP request
-	User-Agent: Network protocol peers can see which browser I am 'using'''
-	headers = {'User-Agent': "'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 " # these are the ML "agents" that completes tasks for humans
+	logger.info(f'GET: {url}')
+	headers = {'User-Agent': "'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 " # Telling the website what browser I am "using"
 							 "(KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36'"}
-	response = get(url, headers=headers, timeout=20) # wait 20s for website to send a response
-	assert response.status_code == 200 # if response.status_code != 200, raise an AssertionError. 200 status code means a response was sent.
+	response = get(url, headers=headers, timeout=20)
+	assert response.status_code == 200
 	soup = BeautifulSoup(response.content, 'lxml')
 	return soup
 
@@ -91,13 +80,16 @@ def _process_soup(soup):
 		post_title = post.get_text()
 		test_item = _item(post_title)
 		print(test_item)
+		# Ram
 		_pattern = re.compile(r'\b\d{2}GB')
 		_find_match(_pattern, post_title)
+		# Intel CPU
 		_pattern = re.compile(r'\bi\d')
 		intel_cpu = _find_match(_pattern, post_title)
 		if intel_cpu:
 			print('CPU: Intel Core ' + intel_cpu.group(0))
-		_pattern = re.compile(r'\b(?i:\wTX)\s?\d{3,4}') # (?i)(\wTX) doesn't work. Using inline flag name locally (within parentheses)
+		# Nvidia GPU
+		_pattern = re.compile(r'\b(?i:\wTX)\s?\d{3,4}')
 		nvidia_gpu = _find_match(_pattern, post_title)
 		if nvidia_gpu:
 			print('GPU: ' + nvidia_gpu.group(0))
