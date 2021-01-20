@@ -61,6 +61,7 @@ def _get_url(keywords, conditions: str = None, categories: list = None, sortby: 
 
 	return url
 
+# Uses url from _get_url to get request the HTML from the webpage, then converts and returns the soup
 def _get_soup(url):		
 	logger.info(f'GET: {url}')
 	headers = {'User-Agent': "'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 " # Telling the website what browser I am "using"
@@ -70,6 +71,7 @@ def _get_soup(url):
 	soup = BeautifulSoup(response.content, 'lxml')
 	return soup
 
+# Uses the soup from _get_soup to search for keywords in the title, such as quantity of ram, CPU, GPU, etc
 def _process_soup(soup):
 	posts = soup.find_all('div', {'class': 'Flex__Box-ych44r-1'})[:-1]
 	for post in posts[1:]: # empty first element
@@ -95,7 +97,7 @@ def _process_soup(soup):
 			print('GPU: ' + nvidia_gpu.group(0))
 		print('*' * 100)
 
-
+# Display the products found that fit the criteria (keywords, categories, conditions) sorted by what is chosen
 def get_products(keywords, categories=None, conditions={'Like New', 'Good'}, sortby=None):
 	print(keywords, categories, conditions, sortby)
 	print(_process_soup(_get_soup(_get_url(keywords, categories=categories, conditions=conditions, sortby=sortby))))
