@@ -73,15 +73,18 @@ def _get_soup(url):
 
 # Uses the soup from _get_soup to search for keywords in the title, such as quantity of ram, CPU, GPU, etc
 def _process_soup(soup):
+	products = []
 	posts = soup.find_all('div', {'class': 'Flex__Box-ych44r-1'})[:-1]
 	for post in posts[1:]: # empty first element
 		# link = post.find('div')
 		# <a href alt='IMPORTANT INFO'></a> not working for some reason
 		# Need to get URL for each post. Also getting the stats from the webpage itself. 
+		product = dict()
 
 		post_title = post.get_text()
 		test_item = _item(post_title)
-		print(test_item)
+		product['title'] = post_title
+
 		# Ram
 		_pattern = re.compile(r'\b\d{2}GB')
 		_find_match(_pattern, post_title)
@@ -97,11 +100,24 @@ def _process_soup(soup):
 			print('GPU: ' + nvidia_gpu.group(0))
 		print('*' * 100)
 
+		# Price
+		_pattern = re.compile(r'\$\S{3,5}\s') # \d{3,4} \S{3,5}
+		price = _find_match(_pattern, post_title)
+		if price:
+			product['title'] = price.group(0)
+
+		# To find price using HTML, <p data-testid='ItemPrice'></p>
+
+		print(product)
+		products.append(product)
+
 # Display the products found that fit the criteria (keywords, categories, conditions) sorted by what is chosen
 def get_products(keywords, categories=None, conditions={'Like New', 'Good'}, sortby=None):
 	print(keywords, categories, conditions, sortby)
-	print(_process_soup(_get_soup(_get_url(keywords, categories=categories, conditions=conditions, sortby=sortby))))
+	return _process_soup(_get_soup(_get_url(keywords, categories=categories, conditions=conditions, sortby=sortby)))
 	# Make new Kivy screen to handle displaying products
+
+get_products('gaming laptop')
 
 if __name__ == '__main__':
 	_process_soup(_get_soup(url))

@@ -105,12 +105,27 @@ class SearchScreen(GridLayout):
         self.options.add_widget(sortby_spinner)
         self.add_widget(self.options)
 
+        def search_products(keywords, categories=None, conditions={'Like New', 'Good'}, sortby=None):
+            info = get_products(keywords, categories=categories, conditions=conditions, sortby=sortby)
+            return ProductsScreen(info)
+
+
         self.search_btn = Button(text='Search Products', color=(1, 1, 1, 1), background_color=(.21, 1.24, 2.25, 0.9))
-        self.search_btn.bind(on_release=lambda _: get_products(self.keywords.text, conditions=self.conditions, categories=self.categories, sortby=self.sortby))
+        self.search_btn.bind(on_release=lambda _: search_products(self.keywords.text, categories=self.conditions, conditions=self.categories, sortby=self.sortby))
         self.add_widget(self.search_btn)
 
-# Alternative colors: (21, 124, 251), (165, 206, 254)
-# (0.01, 206, 255, 0.9)
+# Alternative colors: (21, 124, 251), (165, 206, 254), (0.01, 206, 255, 0.9)
+
+
+class ProductsScreen(GridLayout):
+    def __init__(self, info, **kwargs):
+        super(ProductsScreen, self).__init__(**kwargs)
+        Window.clearcolor = (1, 1, 1, 0.2)
+        self.cols = 3 # Title, price, link
+        for title, price, link in info:
+
+
+
 
 class MyApp(App):
 
