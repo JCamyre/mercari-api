@@ -123,6 +123,7 @@ class ProductsScreen(GridLayout):
         Window.clearcolor = (1, 1, 1, 0.2)
         self.cols = 3 # Title, price, link
         for title, price, link in info:
+            pass
 
 
 

@@ -79,7 +79,14 @@ def _process_soup(soup):
 		# link = post.find('div')
 		# <a href alt='IMPORTANT INFO'></a> not working for some reason
 		# Need to get URL for each post. Also getting the stats from the webpage itself. 
+		a = post.find('a')
+		link = a['href']
+		print(link)
+
+		price = a.find('p', {'data-testid': 'ItemPrice'})
+		print(price.get_text())
 		product = dict()
+		# To find price using HTML, <p data-testid='ItemPrice'></p>
 
 		post_title = post.get_text()
 		test_item = _item(post_title)
@@ -106,7 +113,6 @@ def _process_soup(soup):
 		if price:
 			product['title'] = price.group(0)
 
-		# To find price using HTML, <p data-testid='ItemPrice'></p>
 
 		print(product)
 		products.append(product)
