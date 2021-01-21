@@ -79,12 +79,8 @@ def _process_soup(soup):
 		# link = post.find('div')
 		# <a href alt='IMPORTANT INFO'></a> not working for some reason
 		# Need to get URL for each post. Also getting the stats from the webpage itself. 
-		a = post.find('a')
-		link = a['href']
-		print(link)
 
-		price = a.find('p', {'data-testid': 'ItemPrice'})
-		print(price.get_text())
+
 		product = dict()
 		# To find price using HTML, <p data-testid='ItemPrice'></p>
 
@@ -108,14 +104,22 @@ def _process_soup(soup):
 		print('*' * 100)
 
 		# Price
-		_pattern = re.compile(r'\$\S{3,5}\s') # \d{3,4} \S{3,5}
-		price = _find_match(_pattern, post_title)
-		if price:
-			product['title'] = price.group(0)
+		# _pattern = re.compile(r'\$\S{3,5}\s') # \d{3,4} \S{3,5}
+		# price = _find_match(_pattern, post_title)
+		# if price:
+		# 	product['title'] = price.group(0)
+		a = post.find('a')
+		price = a.find('p', {'data-testid': 'ItemPrice'})
+		product['price'] = price.get_text().split()[0]
 
+
+		# Url
+		link = a['href']
+		product['url'] = 'mercari.com' + link 
 
 		print(product)
 		products.append(product)
+	return products
 
 # Display the products found that fit the criteria (keywords, categories, conditions) sorted by what is chosen
 def get_products(keywords, categories=None, conditions={'Like New', 'Good'}, sortby=None):

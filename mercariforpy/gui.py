@@ -8,6 +8,8 @@ from kivy.config import Config
 from kivy.uix.spinner import Spinner
 from kivy.uix.togglebutton import ToggleButton
 from kivy.core.window import Window
+from kivy.uix.screenmanager import ScreenManager, Screen
+
 from .base import get_products
 
 '''Current goals:
@@ -19,7 +21,8 @@ Add new Kivy screen which will display image, link, title/description of product
 Config.set('kivy', 'default_font', ['data/fonts/Roboto-Light.tff', 'data/fonts/Roboto-Regular.ttf', 'data/fonts/Roboto-Italic.ttf', 'data/fonts/Roboto-Bold.ttf', 'data/fonts/Roboto-BoldItalic.ttf']) 
 Config.write()
 
-class SearchScreen(GridLayout):
+
+class SearchScreen(Screen, GridLayout):
 
     def __init__(self, **kwargs):
         super(SearchScreen, self).__init__(**kwargs)
@@ -107,6 +110,7 @@ class SearchScreen(GridLayout):
 
         def search_products(keywords, categories=None, conditions={'Like New', 'Good'}, sortby=None):
             info = get_products(keywords, categories=categories, conditions=conditions, sortby=sortby)
+            root.manager.current = 'products'
             return ProductsScreen(info)
 
 
@@ -117,13 +121,16 @@ class SearchScreen(GridLayout):
 # Alternative colors: (21, 124, 251), (165, 206, 254), (0.01, 206, 255, 0.9)
 
 
-class ProductsScreen(GridLayout):
+class ProductsScreen(Screen, GridLayout):
     def __init__(self, info, **kwargs):
         super(ProductsScreen, self).__init__(**kwargs)
         Window.clearcolor = (1, 1, 1, 0.2)
         self.cols = 3 # Title, price, link
         for title, price, link in info:
-            pass
+            self.add_widget(Label(text=title))
+            self.add_widget(Label(text=price))
+            self.add_widget(Label(text=link))
+
 
 
 
@@ -131,7 +138,11 @@ class ProductsScreen(GridLayout):
 class MyApp(App):
 
     def build(self):
-        return SearchScreen()
+        sm = ScreenManager()
+        sm.add_widget(Screen(name='search'))
+        sm.add_widget(Screen(name='products'))
+
+        return sm
 
 
 if __name__ == '__main__':
