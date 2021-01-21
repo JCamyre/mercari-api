@@ -14,12 +14,12 @@ def _find_match(pattern, words):
 	match = pattern.search(words)
 	return match
 
+# May get rid of this, I think dictionaries are fine
 class _item:
-	def __init__(self, information):
-		title, price, *misc = information.split('$')
+	def __init__(self, title, price, url):
 		self._title = title
 		self._price = price 
-		self._misc = misc
+		self._url = url
 
 	def __str__(self): 
 		return f'{self._title[3:]}: ${self._price}'
@@ -80,34 +80,29 @@ def _process_soup(soup):
 		# <a href alt='IMPORTANT INFO'></a> not working for some reason
 		# Need to get URL for each post. Also getting the stats from the webpage itself. 
 
-
 		product = dict()
-		# To find price using HTML, <p data-testid='ItemPrice'></p>
 
-		post_title = post.get_text()
-		test_item = _item(post_title)
-		product['title'] = post_title
+		post_title = post.find('div', {'data-testid': 'ItemName'})
+		product['title'] = ' '.join(post_title.get_text().split())
+		post_info = post_title.get_text()
 
 		# Ram
 		_pattern = re.compile(r'\b\d{2}GB')
-		_find_match(_pattern, post_title)
+		_find_match(_pattern, post_info)
 		# Intel CPU
 		_pattern = re.compile(r'\bi\d')
-		intel_cpu = _find_match(_pattern, post_title)
-		if intel_cpu:
-			print('CPU: Intel Core ' + intel_cpu.group(0))
+		intel_cpu = _find_match(_pattern, post_info)
+		# if intel_cpu:
+		# 	print('CPU: Intel Core ' + intel_cpu.group(0))
 		# Nvidia GPU
 		_pattern = re.compile(r'\b(?i:\wTX)\s?\d{3,4}')
-		nvidia_gpu = _find_match(_pattern, post_title)
-		if nvidia_gpu:
-			print('GPU: ' + nvidia_gpu.group(0))
-		print('*' * 100)
+		nvidia_gpu = _find_match(_pattern, post_info)
+		# if nvidia_gpu:
+		# 	print('GPU: ' + nvidia_gpu.group(0))
 
 		# Price
 		# _pattern = re.compile(r'\$\S{3,5}\s') # \d{3,4} \S{3,5}
-		# price = _find_match(_pattern, post_title)
-		# if price:
-		# 	product['title'] = price.group(0)
+
 		a = post.find('a')
 		price = a.find('p', {'data-testid': 'ItemPrice'})
 		product['price'] = price.get_text().split()[0]
@@ -127,25 +122,7 @@ def get_products(keywords, categories=None, conditions={'Like New', 'Good'}, sor
 	return _process_soup(_get_soup(_get_url(keywords, categories=categories, conditions=conditions, sortby=sortby)))
 	# Make new Kivy screen to handle displaying products
 
-get_products('gaming laptop')
-
 if __name__ == '__main__':
-	_process_soup(_get_soup(url))
+	pass
 
-	html = '''<a href="some_url">next</a>
-	<span class="class"><a href="another_url">later</a></span>'''
-
-	soup = BeautifulSoup(html, 'lxml')
-	print(type(soup))
-	for a in soup.find_all('a', href=True):
-		print("Found the URL:", a['href'])
-
-	soup = BeautifulSoup('<a class="nav-link match-link-stats" href="/football/matches/match867851_Kalteng_Putra-Arema-online/" title="Stat"><i class="icon-match-link"></i></a>', 'lxml')
-	tag = soup.find('a')
-	type(tag)
-	print(tag.get('href'))
-	tag['href']
-
-
-# GUI
 

@@ -156,7 +156,7 @@ class Menu(BoxLayout):
     def getTemp(self,dt):
         thetemp = 55 #will be changed to temp.read()
         self.TempLabel.text = str(thetemp)
-        print(thetemp)
+        (thetemp)
 
 or
 
