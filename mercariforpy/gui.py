@@ -17,7 +17,7 @@ from .base import get_products
 Implement cool looking GUI skins
 Add new Kivy screen which will display image, link, title/description of products after searching
 '''
-LIGHTBLUE = LIGHTBLUE
+LIGHTBLUE = (0.21, 1.24, 2.25, 0.9)
 # Have to add Roboto-Light.tff manually, can I automate for people downloading it as an executable?
 Config.set('kivy', 'default_font', ['data/fonts/Roboto-Light.tff', 'data/fonts/Roboto-Regular.ttf', 'data/fonts/Roboto-Italic.ttf', 'data/fonts/Roboto-Bold.ttf', 'data/fonts/Roboto-BoldItalic.ttf']) 
 Config.write()
@@ -27,13 +27,13 @@ class SearchScreen(GridLayout, Screen):
 
     def __init__(self, **kwargs):
         super(SearchScreen, self).__init__(**kwargs)
-        Window.clearcolor = (1, 1, 1, 0.2)
+        Window.clearcolor = (1, 1, 1, 0.1)
         self.light_theme = True # False == dark theme
         self.cols = 1
         self.keywords = TextInput(hint_text='Enter keywords', multiline=False, size_hint=(.2, None), 
         height=30, background_color=(0, 0, 0, 0.2), foreground_color=(1, 1, 1, 1)) # , 
         self.add_widget(self.keywords)
-        self.categories = set()
+        self.categories = []
         self.conditions = set()
         self.sortby = 'Best match'
 
@@ -44,20 +44,22 @@ class SearchScreen(GridLayout, Screen):
         electronics_dropdown = DropDown()
         computers_dropdown = DropDown()
 
+        def choose_category(_, text):
+            if text in self.categories:
+                self.categories.remove(text)
+            else:
+                self.categories.append(text) # Equivalent for lambda instance, text: setattr(self, 'category', text)
+        
         def dropdown_btn(btn, dropdown):
             dropdown.open(btn)
-            self.categories.add(btn.text)
+            choose_category('', btn.text)
 
         self.computers_btn = Button(text='Computers', size_hint=(.2, None), height=30)
         self.computers_btn.bind(on_release=lambda btn: dropdown_btn(btn, computers_dropdown))
         self.laptops = ToggleButton(text='Laptops', size_hint=(.2, None), height=30) # 
         self.desktops = ToggleButton(text='Desktops', size_hint=(.2, None), height=30)
 
-        def choose_category(instance, text):
-            if text in self.categories:
-                self.categories.remove(text)
-            else:
-                self.categories.add(text) # Equivalent for lambda instance, text: setattr(self, 'category', text)
+     
 
         self.laptops.bind(on_release=lambda btn: computers_dropdown.select(btn.text))
         computers_dropdown.bind(on_select = choose_category) # "Listen for the selection". This is the highly coveted DropDown.select()
@@ -109,12 +111,14 @@ class SearchScreen(GridLayout, Screen):
         self.options.add_widget(sortby_spinner)
         self.add_widget(self.options)
 
-        def search_products(keywords, categories=None, conditions={'Like New', 'Good'}, sortby=None):
-            info = get_products(keywords, categories=categories, conditions=conditions, sortby=sortby)
-            root.manager.current = 'products'
+        def search_products(keywords, conditions={'Like New', 'Good'}, categories=None, sortby=None):
+            # Put check in place for 
+            info = get_products(keywords, conditions=conditions, categories=categories, sortby=sortby)
+            self.manager.current = 'products'
+            self.manager.current_screen.load_products(info) # Directly referencing the screenobject, not the name
 
         self.search_btn = Button(text='Search Products', color=(1, 1, 1, 1), background_color=LIGHTBLUE)
-        self.search_btn.bind(on_release=lambda _: search_products(self.keywords.text, categories=self.conditions, conditions=self.categories, sortby=self.sortby))
+        self.search_btn.bind(on_release=lambda _: search_products(self.keywords.text, conditions=self.conditions, categories=self.categories, sortby=self.sortby))
         self.add_widget(self.search_btn)
 
 # Alternative colors: (21, 124, 251), (165, 206, 254), (0.01, 206, 255, 0.9)
@@ -124,15 +128,19 @@ class ProductsScreen(GridLayout, Screen):
     def __init__(self, info=None, **kwargs):
         super(ProductsScreen, self).__init__(**kwargs)
         Window.clearcolor = (1, 1, 1, 0.2)
-        self.cols = 3 # Title, price, link
+        self.cols = 3 # Title, price, url
+
+    def change_screen(self):
+        self.manager.clear_widgets()
+        self.manager.current = 'search'
 
     def load_products(self, info): # How to clear elements?
         if info:
-            for item in info:
-                self.add_widget(Label(text=item['title']))
-                self.add_widget(Label(text=item['price']))
+            for item in info[:6]:
+                self.add_widget(Label(text=item['title'], color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
+                self.add_widget(Label(text=item['price'], color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
                 btn = Button(text='Click to go to item page.')
-                btn.bind(on_release=lambda _: webbrowser.open(item['link']))
+                btn.bind(on_release=lambda _: webbrowser.open(item['url']))
                 self.add_widget(btn)
 
 

@@ -36,7 +36,7 @@ BRANDS = ('ASUS', 'Acer', 'HP', 'Toshiba', 'Lenovo', 'Dell', 'MSI', 'Alienware')
 
 '''Search for a product's url using keywords. Filter results based on the condition and category of products.
 Can also choose how to sort products.'''
-def _get_url(keywords, conditions: str = None, categories: list = None, sortby: str = None):
+def _get_url(keywords, conditions: list = None, categories: list = None, sortby: str = None):
 	url = BASE_URL + '?'
 	keywords = keywords.split()
 	keywords = '%20'.join(keywords)
@@ -44,10 +44,11 @@ def _get_url(keywords, conditions: str = None, categories: list = None, sortby: 
 	url += keywords_url + '&'
 
 	if categories: 
-		for category in categories:
-			category_id = category_ids[category]
-			category_url = f'categoryIds={category_id}'
-			url += category_url + '&'
+		# for category in categories:
+		category = categories[-1]
+		category_id = category_ids[category]
+		category_url = f'categoryIds={category_id}'
+		url += category_url + '&'
 
 	if conditions:
 		conditions = [str(conditionIds[condition]) for condition in conditions]
