@@ -17,13 +17,13 @@ from .base import get_products
 Implement cool looking GUI skins
 Add new Kivy screen which will display image, link, title/description of products after searching
 '''
-
+LIGHTBLUE = LIGHTBLUE
 # Have to add Roboto-Light.tff manually, can I automate for people downloading it as an executable?
 Config.set('kivy', 'default_font', ['data/fonts/Roboto-Light.tff', 'data/fonts/Roboto-Regular.ttf', 'data/fonts/Roboto-Italic.ttf', 'data/fonts/Roboto-Bold.ttf', 'data/fonts/Roboto-BoldItalic.ttf']) 
 Config.write()
 
 
-class SearchScreen(Screen, GridLayout):
+class SearchScreen(GridLayout, Screen):
 
     def __init__(self, **kwargs):
         super(SearchScreen, self).__init__(**kwargs)
@@ -64,20 +64,20 @@ class SearchScreen(Screen, GridLayout):
         computers_dropdown.add_widget(self.laptops)
 
         self.electronics_btn = Button(text='Electronics', size_hint=(None, None), height=30, 
-                                        color=(1, 1, 1, 1), background_color=(.21, 1.24, 2.25, 0.9))
+                                        color=(1, 1, 1, 1), background_color=LIGHTBLUE)
         self.electronics_btn.bind(on_release=lambda btn: dropdown_btn(btn, electronics_dropdown))
         electronics_dropdown.add_widget(self.computers_btn)
         electronics_dropdown.bind(on_select=choose_category)
 
         self.categories_btn = Button(text='Categories', size_hint=(.1, None), height=30, 
-                                        color=(1, 1, 1, 1), background_color=(.21, 1.24, 2.25, 0.9))
+                                        color=(1, 1, 1, 1), background_color=LIGHTBLUE)
         self.categories_btn.bind(on_release=categories_dropdown.open)
         categories_dropdown.add_widget(self.electronics_btn)
         self.options.add_widget(self.categories_btn)
 
         # Conditions Selection
         conditions_dropdown = DropDown()
-        self.conditions_btn = Button(text='Conditions', size_hint=(.1, None), height=30, color=(1, 1, 1, 1), background_color=(.21, 1.24, 2.25, 0.9))
+        self.conditions_btn = Button(text='Conditions', size_hint=(.1, None), height=30, color=(1, 1, 1, 1), background_color=LIGHTBLUE)
         self.conditions_btn.bind(on_release=conditions_dropdown.open)
         for condition in ['New', 'Like New', 'Good']:
             btn = ToggleButton(text=condition, size_hint=(.2, None), height=30)
@@ -100,7 +100,7 @@ class SearchScreen(Screen, GridLayout):
             height=30,
             pos_hint={'center_x': .5, 'center_y': .5}, 
             color=(1, 1, 1, 1), 
-            background_color=(.21, 1.24, 2.25, 0.9))
+            background_color=LIGHTBLUE)
 
         def choose_sortby(spinner, text):
             self.sortby = text
@@ -113,27 +113,27 @@ class SearchScreen(Screen, GridLayout):
             info = get_products(keywords, categories=categories, conditions=conditions, sortby=sortby)
             root.manager.current = 'products'
 
-        self.search_btn = Button(text='Search Products', color=(1, 1, 1, 1), background_color=(.21, 1.24, 2.25, 0.9))
+        self.search_btn = Button(text='Search Products', color=(1, 1, 1, 1), background_color=LIGHTBLUE)
         self.search_btn.bind(on_release=lambda _: search_products(self.keywords.text, categories=self.conditions, conditions=self.categories, sortby=self.sortby))
         self.add_widget(self.search_btn)
 
 # Alternative colors: (21, 124, 251), (165, 206, 254), (0.01, 206, 255, 0.9)
 
 
-class ProductsScreen(Screen, GridLayout):
+class ProductsScreen(GridLayout, Screen):
     def __init__(self, info=None, **kwargs):
         super(ProductsScreen, self).__init__(**kwargs)
         Window.clearcolor = (1, 1, 1, 0.2)
         self.cols = 3 # Title, price, link
+
+    def load_products(self, info): # How to clear elements?
         if info:
             for item in info:
                 self.add_widget(Label(text=item['title']))
                 self.add_widget(Label(text=item['price']))
                 btn = Button(text='Click to go to item page.')
-                btn.bind(on_release=lamba _: webbrowser.open(item['link']))
+                btn.bind(on_release=lambda _: webbrowser.open(item['link']))
                 self.add_widget(btn)
-
-
 
 
 
