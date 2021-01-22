@@ -9,6 +9,7 @@ from kivy.uix.spinner import Spinner
 from kivy.uix.togglebutton import ToggleButton
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, Screen
+import webbrowser
 
 from .base import get_products
 
@@ -111,8 +112,6 @@ class SearchScreen(Screen, GridLayout):
         def search_products(keywords, categories=None, conditions={'Like New', 'Good'}, sortby=None):
             info = get_products(keywords, categories=categories, conditions=conditions, sortby=sortby)
             root.manager.current = 'products'
-            return ProductsScreen(info)
-
 
         self.search_btn = Button(text='Search Products', color=(1, 1, 1, 1), background_color=(.21, 1.24, 2.25, 0.9))
         self.search_btn.bind(on_release=lambda _: search_products(self.keywords.text, categories=self.conditions, conditions=self.categories, sortby=self.sortby))
@@ -122,14 +121,17 @@ class SearchScreen(Screen, GridLayout):
 
 
 class ProductsScreen(Screen, GridLayout):
-    def __init__(self, info, **kwargs):
+    def __init__(self, info=None, **kwargs):
         super(ProductsScreen, self).__init__(**kwargs)
         Window.clearcolor = (1, 1, 1, 0.2)
         self.cols = 3 # Title, price, link
-        for title, price, link in info:
-            self.add_widget(Label(text=title))
-            self.add_widget(Label(text=price))
-            self.add_widget(Label(text=link))
+        if info:
+            for item in info:
+                self.add_widget(Label(text=item['title']))
+                self.add_widget(Label(text=item['price']))
+                btn = Button(text='Click to go to item page.')
+                btn.bind(on_release=lamba _: webbrowser.open(item['link']))
+                self.add_widget(btn)
 
 
 
@@ -139,8 +141,8 @@ class MyApp(App):
 
     def build(self):
         sm = ScreenManager()
-        sm.add_widget(Screen(name='search'))
-        sm.add_widget(Screen(name='products'))
+        sm.add_widget(SearchScreen(name='search'))
+        sm.add_widget(ProductsScreen(name='products'))
 
         return sm
 
