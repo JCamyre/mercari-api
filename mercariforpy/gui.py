@@ -140,7 +140,7 @@ class ProductsScreen(GridLayout, Screen):
                 self.add_widget(Label(text=item['title'], color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
                 self.add_widget(Label(text=item['price'], color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
                 btn = Button(text='Click to go to item page.')
-                btn.bind(on_release=lambda _: webbrowser.open(item['url']))
+                btn.bind(on_release=lambda _: webbrowser.open(item['url'])) # Would like to use chrome/opera when looking at item
                 self.add_widget(btn)
 
 
