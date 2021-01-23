@@ -9,6 +9,7 @@ from kivy.uix.spinner import Spinner
 from kivy.uix.togglebutton import ToggleButton
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.scrollview import ScrollView
 import webbrowser
 
 from .base import get_products
@@ -128,20 +129,27 @@ class ProductsScreen(GridLayout, Screen):
     def __init__(self, info=None, **kwargs):
         super(ProductsScreen, self).__init__(**kwargs)
         Window.clearcolor = (1, 1, 1, 0.2)
-        self.cols = 3 # Title, price, url
+        self.cols = 1 # Title, price, url
 
-    def change_screen(self):
-        self.manager.clear_widgets()
-        self.manager.current = 'search'
+        def change_screen(self):
+            self.manager.current_screen.clear_widgets()
+            self.manager.current = 'search'
+
+        self.return_btn = Button(text='return')
+        self.return_btn.bind(on_release=lambda _: self.change_screen())
 
     def load_products(self, info): # How to clear elements?
+        self.scroll = ScrollView(size_hint=(1, 1), size=(self.width, self.height))
+        self.layout = GridLayout(cols=3, spacing=100, size_hint_y=None)
         if info:
-            for item in info[:6]:
-                self.add_widget(Label(text=item['title'], color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
-                self.add_widget(Label(text=item['price'], color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
+            for item in info:
+                self.layout.add_widget(Label(text=item['title'], color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
+                self.layout.add_widget(Label(text=item['price'], color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
                 btn = Button(text='Click to go to item page.')
                 btn.bind(on_release=lambda _: webbrowser.open(item['url'])) # Would like to use chrome/opera when looking at item
-                self.add_widget(btn)
+                self.layout.add_widget(btn)
+        self.scroll.add_widget(self.layout)
+        self.add_widget(self.scroll)
 
 
 
