@@ -113,13 +113,11 @@ def _process_soup(soup):
 		link = a['href']
 		product['url'] = 'mercari.com' + link 
 
-		print(product)
 		products.append(product)
 	return products
 
 # Display the products found that fit the criteria (keywords, categories, conditions) sorted by what is chosen
 def get_products(keywords, categories=None, conditions={'Like New', 'Good'}, sortby=None):
-	print(keywords, categories, conditions, sortby)
 	return _process_soup(_get_soup(_get_url(keywords, categories=categories, conditions=conditions, sortby=sortby)))
 	# Make new Kivy screen to handle displaying products
 

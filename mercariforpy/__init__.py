@@ -2,6 +2,7 @@
 from .base import _process_soup, _get_soup, _get_url
 from .gui import MyApp, get_products
 
+# Redo requirements.txt with pipenv
 def run_app():
 	MyApp()
 

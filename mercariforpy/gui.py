@@ -139,15 +139,17 @@ class ProductsScreen(GridLayout, Screen):
         self.return_btn.bind(on_release=lambda _: self.change_screen())
 
     def load_products(self, info): # How to clear elements?
-        self.scroll = ScrollView(size_hint=(1, 1), size=(self.width, self.height))
-        self.layout = GridLayout(cols=3, spacing=100, size_hint_y=None)
+        self.scroll = ScrollView(size=self.size)
+        self.layout = GridLayout(cols=3, size_hint_y=None, size=(1000, len(info) * 100), spacing=(0, 5), padding=(0, 0)) # GridLayout.size.y must be > ScrollView.size.y for it to scroll
         if info:
             for item in info:
                 self.layout.add_widget(Label(text=item['title'], color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
-                self.layout.add_widget(Label(text=item['price'], color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
-                btn = Button(text='Click to go to item page.')
-                btn.bind(on_release=lambda _: webbrowser.open(item['url'])) # Would like to use chrome/opera when looking at item
-                self.layout.add_widget(btn)
+                self.layout.add_widget(Label(text=f'Price: {item["price"]}', size_hint=(None, 0.2), color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
+                btn = Button(text='Click to go to item page.', color=(1, 1, 1, 1), background_color=LIGHTBLUE)
+                btn.bind(on_release=lambda _: webbrowser.open(item['url'])) # Changed environment variable to use Chrome for webbrowser
+                self.layout.add_widget(btn) # For some reason, all buttons are bound to the url = item[-1]['url']
+                print(item['url']) 
+
         self.scroll.add_widget(self.layout)
         self.add_widget(self.scroll)
 
