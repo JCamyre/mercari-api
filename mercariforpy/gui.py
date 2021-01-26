@@ -145,10 +145,10 @@ class ProductsScreen(GridLayout, Screen):
             for item in info:
                 self.layout.add_widget(Label(text=item['title'], color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
                 self.layout.add_widget(Label(text=f'Price: {item["price"]}', size_hint=(None, 0.2), color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
-                btn = Button(text='Click to go to item page.', color=(1, 1, 1, 1), background_color=LIGHTBLUE)
-                btn.bind(on_release=lambda _: webbrowser.open(item['url'])) # Changed environment variable to use Chrome for webbrowser
+                btn = Button(text=item['url'], color=(1, 1, 1, 1), background_color=LIGHTBLUE, on_release=lambda instance: webbrowser.open(instance.text))
+                # Changed environment variable to use Chrome for webbrowser
+                # The reason for every button url being the same is because when the button is pressed, it looks for item['url'] to be ran, and the last item['url'] is the from the last item in the dictionary, so they all go to the same url
                 self.layout.add_widget(btn) # For some reason, all buttons are bound to the url = item[-1]['url']
-                print(item['url']) 
 
         self.scroll.add_widget(self.layout)
         self.add_widget(self.scroll)
