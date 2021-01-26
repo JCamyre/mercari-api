@@ -10,6 +10,9 @@ from kivy.uix.togglebutton import ToggleButton
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.scrollview import ScrollView
+from kivy.graphics import Color, Rectangle
+from kivy.uix.widget import Widget
+from kivy.lang.builder import Builder
 import webbrowser
 
 from .base import get_products
@@ -23,13 +26,38 @@ LIGHTBLUE = (0.21, 1.24, 2.25, 0.9)
 Config.set('kivy', 'default_font', ['data/fonts/Roboto-Light.tff', 'data/fonts/Roboto-Regular.ttf', 'data/fonts/Roboto-Italic.ttf', 'data/fonts/Roboto-Bold.ttf', 'data/fonts/Roboto-BoldItalic.ttf']) 
 Config.write()
 
+bg_label = Builder.load_string('''
+<BackgroundColor@Widget>
+    background_color: 1, 1, 1, 1
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            size: self.size
+            pos: self.pos
+            
+<BackgroundLabel@Label+BackgroundColor>
+    background_color: 0, 0, 0, 0
+
+BackgroundLabel
+''')
+
+class BackgroundColor(Widget):
+    def __init__(self):
+        app = App.get_running_app()
+        background_color = 1, 1, 1, 1
+        with self.canvas.before: 
+            Color(rgba=app.root.background_color)
+            Rectangle(size=self.size, pos=self.pos)
+
+class BackgroundLabel(Label, BackgroundColor):
+    background_color = 0, 0, 0, 0
 
 class SearchScreen(GridLayout, Screen):
 
     def __init__(self, **kwargs):
         super(SearchScreen, self).__init__(**kwargs)
         Window.clearcolor = (1, 1, 1, 0.1)
-        self.light_theme = True # False == dark theme
         self.cols = 1
         self.keywords = TextInput(hint_text='Enter keywords', multiline=False, size_hint=(.2, None), 
         height=30, background_color=(0, 0, 0, 0.2), foreground_color=(1, 1, 1, 1)) # , 
@@ -37,6 +65,19 @@ class SearchScreen(GridLayout, Screen):
         self.categories = []
         self.conditions = set()
         self.sortby = 'Best match'
+
+        def change_theme(instance):
+            if instance.state == 'down':
+                instance.text = 'Light Mode'
+                Window.clearcolor = (0, 0, 0, 1)
+                # Change buttons bg color to black
+            else:
+                instance.text = 'Dark Mode'
+                Window.clearcolor = (1, 1, 1, 0.1)
+
+        theme_btn = ToggleButton(text='Dark Mode', size_hint=(None, 0.2))
+        theme_btn.bind(on_release=change_theme)
+        self.add_widget(theme_btn)
 
         # Category Selection
         self.options = GridLayout()
@@ -59,8 +100,6 @@ class SearchScreen(GridLayout, Screen):
         self.computers_btn.bind(on_release=lambda btn: dropdown_btn(btn, computers_dropdown))
         self.laptops = ToggleButton(text='Laptops', size_hint=(.2, None), height=30) # 
         self.desktops = ToggleButton(text='Desktops', size_hint=(.2, None), height=30)
-
-     
 
         self.laptops.bind(on_release=lambda btn: computers_dropdown.select(btn.text))
         computers_dropdown.bind(on_select = choose_category) # "Listen for the selection". This is the highly coveted DropDown.select()
@@ -143,8 +182,10 @@ class ProductsScreen(GridLayout, Screen):
         self.layout = GridLayout(cols=3, size_hint_y=None, size=(1000, len(info) * 100), spacing=(0, 5), padding=(0, 0)) # GridLayout.size.y must be > ScrollView.size.y for it to scroll
         if info:
             for item in info:
-                self.layout.add_widget(Label(text=item['title'], color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
-                self.layout.add_widget(Label(text=f'Price: {item["price"]}', size_hint=(None, 0.2), color=(0, 0, 0, 1))) # , background_color=LIGHTBLUE
+                title = BackgroundLabel(text=item['title'], color=(0, 0, 0, 1), background_color=LIGHTBLUE)
+                self.layout.add_widget(title)
+                price = BackgroundLabel(text=f'Price: {item["price"]}', size_hint=(None, 0.2), color=(0, 0, 0, 1), background_color=LIGHTBLUE)
+                self.layout.add_widget(price) # , background_color=LIGHTBLUE
                 btn = Button(text=item['url'], color=(1, 1, 1, 1), background_color=LIGHTBLUE, on_release=lambda instance: webbrowser.open(instance.text))
                 # Changed environment variable to use Chrome for webbrowser
                 # The reason for every button url being the same is because when the button is pressed, it looks for item['url'] to be ran, and the last item['url'] is the from the last item in the dictionary, so they all go to the same url
@@ -152,8 +193,6 @@ class ProductsScreen(GridLayout, Screen):
 
         self.scroll.add_widget(self.layout)
         self.add_widget(self.scroll)
-
-
 
 class MyApp(App):
 
